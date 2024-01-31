@@ -1,8 +1,8 @@
 package db
 
-type status struct {
-	isActive bool
-	lastFetched string
+type Status struct {
+	IsActive bool
+	LastFetched string
 }
 
-type websiteDB map[string]status
+type websiteDB map[string]Status

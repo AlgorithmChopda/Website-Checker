@@ -14,13 +14,31 @@ type websiteRequestObject struct {
 
 func ReadWebsite(res http.ResponseWriter, req *http.Request) {
 	var websites websiteRequestObject
-	json.NewDecoder(req.Body).Decode(&websites)
+	err := json.NewDecoder(req.Body).Decode(&websites)
+	if err != nil {
+		res.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(res, "Incomplete request")
+		return
+	}
+	
 	for _, url := range(websites.Data) {
 		fmt.Println(url)
 		db.Data.AddWebsite(url)
 	}
-	
-	fmt.Println(db.Data)
 	res.WriteHeader(http.StatusOK)
 	fmt.Fprintf(res, "OK")
+}
+
+func GetWebsiteStatus (res http.ResponseWriter, req *http.Request) {
+	url := req.URL.Query().Get("url")
+	var status db.Status
+	status, err := db.Data.GetStatus(url)
+	if err != nil {
+		res.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(res, "No such website found")
+		return
+	}
+
+	res.WriteHeader(http.StatusOK)
+	fmt.Fprintf(res, "Website: %s\nActive: %t\nLast Fetched: %s", url, status.IsActive, status.LastFetched)
 }

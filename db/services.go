@@ -29,3 +29,4 @@ func (data *websiteDB) GetStatus(websiteUrl string) (Status) {
 func (data *websiteDB) DeleteWebsite(websiteUrl string) {
 	delete(*data, websiteUrl)
 }
+

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/AlgorithmChopda/Website-Checker.git/db"
 )
@@ -67,3 +68,28 @@ func DeleteWebsite(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(http.StatusOK)
 	fmt.Fprintf(res, "Website deleted successfully")
 }
+
+func CheckWebsiteStatus () {
+	for {
+		for url := range(db.Data) {
+			go pingWebsite(url)
+		}
+
+		// go run check
+		time.Sleep(time.Second * 5)		
+	}
+}
+
+func pingWebsite(url string) {
+	res, err := http.Get(url)
+	var status bool
+	if err != nil {
+		status = false;
+	}else {
+		if res.StatusCode == 200 {
+			status = true;
+		}
+	}
+	
+	db.Data.UpdateStatus(url, status)
+ }

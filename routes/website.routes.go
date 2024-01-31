@@ -3,7 +3,7 @@ package routes
 import (
 	"net/http"
 
-	controllers "github.com/AlgorithmChopda/Website-Checker.git/controller"
+	controllers "github.com/AlgorithmChopda/Website-Checker.git/handlers"
 	"github.com/gorilla/mux"
 )
 

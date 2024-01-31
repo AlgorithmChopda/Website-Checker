@@ -31,6 +31,16 @@ func ReadWebsite(res http.ResponseWriter, req *http.Request) {
 
 func GetWebsiteStatus (res http.ResponseWriter, req *http.Request) {
 	url := req.URL.Query().Get("url")
+	
+	// if all websites status is requested
+	if url == "" {
+		res.WriteHeader(http.StatusOK)
+		for url, status := range(db.Data) {
+			fmt.Fprintf(res, "Website: %s\n\tActive: %t\n\tLast Fetched: %s\n\n", url, status.IsActive, status.LastFetched)		
+		}	
+		return 
+	}
+	
 	var status db.Status
 	status, err := db.Data.GetStatus(url)
 	if err != nil {

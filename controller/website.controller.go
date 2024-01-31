@@ -23,7 +23,9 @@ func ReadWebsite(res http.ResponseWriter, req *http.Request) {
 	
 	for _, url := range(websites.Data) {
 		fmt.Println(url)
-		db.Data.AddWebsite(url)
+		if !db.Data.IsPresent(url) {
+			db.Data.AddWebsite(url)
+		}
 	}
 	res.WriteHeader(http.StatusOK)
 	fmt.Fprintf(res, "OK")
@@ -42,13 +44,26 @@ func GetWebsiteStatus (res http.ResponseWriter, req *http.Request) {
 	}
 	
 	var status db.Status
-	status, err := db.Data.GetStatus(url)
-	if err != nil {
+	if(!db.Data.IsPresent(url)) {
+		res.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(res, "No such website found")
+		return
+	}
+	
+	status = db.Data.GetStatus(url)
+	res.WriteHeader(http.StatusOK)
+	fmt.Fprintf(res, "Website: %s\nActive: %t\nLast Fetched: %s", url, status.IsActive, status.LastFetched)
+}
+
+func DeleteWebsite(res http.ResponseWriter, req *http.Request) {
+	url := req.URL.Query().Get("url")
+	if(!db.Data.IsPresent(url)) {
 		res.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(res, "No such website found")
 		return
 	}
 
+	db.Data.DeleteWebsite(url);
 	res.WriteHeader(http.StatusOK)
-	fmt.Fprintf(res, "Website: %s\nActive: %t\nLast Fetched: %s", url, status.IsActive, status.LastFetched)
+	fmt.Fprintf(res, "Website deleted successfully")
 }

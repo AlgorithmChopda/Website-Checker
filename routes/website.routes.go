@@ -8,5 +8,5 @@ import (
 )
 
 func WebsiteRoutes (router *mux.Router) {
-	router.HandleFunc("", controllers.Test).Methods(http.MethodGet)
+	router.HandleFunc("", controllers.ReadWebsite).Methods(http.MethodPost)
 }

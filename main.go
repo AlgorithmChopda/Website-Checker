@@ -4,13 +4,17 @@ import (
 	"fmt"
 	"net/http"
 
-	controllers "github.com/AlgorithmChopda/Website-Checker.git/handlers"
-	"github.com/AlgorithmChopda/Website-Checker.git/routes"
+	"github.com/AlgorithmChopda/Website-Checker.git/internal"
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	router := routes.Routes()
+	router := mux.NewRouter()
+
+	// router.HandleFunc("/website", internal.ReadWebsiteHandler(internal.WesbiteService{})).Methods(http.MethodPost)
+	// router.HandleFunc("/website/status", internal.ReadWebsiteHandler(internal.WesbiteService{})).Methods(http.MethodGet)
+	
 	fmt.Println("Server Started....")
-	go controllers.CheckWebsiteStatus()
+	go internal.CheckWebsiteStatus()
 	http.ListenAndServe("localhost:8000", router)
 }

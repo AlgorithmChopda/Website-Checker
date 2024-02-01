@@ -1,5 +1,8 @@
 package db
 
+//change file name to website.go and use thread safe map DummyData and write following methods on it
+//AddWebsite, UpdateStatus, GetStatus, DeleteWebsite
+
 import (
 	"time"
 )

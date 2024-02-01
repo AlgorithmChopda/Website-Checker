@@ -9,6 +9,21 @@ import (
 	"github.com/AlgorithmChopda/Website-Checker.git/db"
 )
 
+//structure code in a layered format
+//handler layer - controller
+
+//^
+//|
+//|
+
+//service or business layer
+
+//^
+//|
+//|
+
+//data layer - which will interact with database
+
 type websiteRequestObject struct {
 	Data []string `json:"data"`
 }

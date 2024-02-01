@@ -69,13 +69,12 @@ func DeleteWebsite(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(res, "Website deleted successfully")
 }
 
+// util functions to check if website active or not every 5 second
 func CheckWebsiteStatus () {
 	for {
 		for url := range(db.Data) {
 			go pingWebsite(url)
 		}
-
-		// go run check
 		time.Sleep(time.Second * 5)		
 	}
 }

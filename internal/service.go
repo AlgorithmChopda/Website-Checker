@@ -3,52 +3,45 @@ package internal
 import (
 	"errors"
 	"fmt"
-	"net/http"
-	"time"
 )
 
+type service struct {
+	websiteRepo WebsiteRepository
+}
+type WebsiteService interface {
+	readWebsite(urls websiteRequestObject)
+	getWebsiteStatus(url string) (status, error)
+	getAllWebsiteStatus() websiteDB
+	CheckWebsiteStatus()
+}
 
-func readWebsite(urls websiteRequestObject) {
-	for _, url := range(urls.Data) {
-		fmt.Println(url)
-		if !data.isPresent(url)  {
-			data.addWebsite(url)
-		}		
+func NewService(websiteRepoObject WebsiteRepository) WebsiteService {
+	return &service{
+		websiteRepo: websiteRepoObject,
 	}
 }
 
-func getWebsiteStatus(url string) (status, error) {
-	if data.isPresent(url) {
-		return data.getStatus(url), nil
+func (svc *service) readWebsite(urls websiteRequestObject) {
+	for _, url := range urls.Data {
+		fmt.Println(url)
+		if !svc.websiteRepo.isPresent(url) {
+			svc.websiteRepo.addWebsite(url)
+		}
+	}
+}
+
+func (svc *service) getWebsiteStatus(url string) (status, error) {
+	if svc.websiteRepo.isPresent(url) {
+		return svc.websiteRepo.getStatus(url), nil
 	}
 
 	return status{}, errors.New("No such website found")
 }
 
-func getAllWebsiteStatus() websiteDB {
-	return data 
+func (svc *service) getAllWebsiteStatus() websiteDB {
+	return svc.websiteRepo.getAllStatus()
 }
 
-// util function to check status of website every 5 second
-func CheckWebsiteStatus () {
-	for {
-		for url := range(data) {
-			go pingWebsite(url)
-		}
-		time.Sleep(time.Second * 5)		
-	}
+func (svc *service) CheckWebsiteStatus() {
+	svc.websiteRepo.checkAllStatus()
 }
-
-func pingWebsite(url string) {
-	res, err := http.Get(url)
-	var status bool
-	if err != nil {
-		status = false;
-	}else {
-		if res.StatusCode == 200 {
-			status = true;
-		}
-	}
-	
-	data.updateStatus(url, status)
- }

@@ -6,7 +6,11 @@ import (
 	"net/http"
 )
 
-func ReadWebsiteHandler(websiteSvc WesbiteService) func(w http.ResponseWriter, r *http.Request) {
+type websiteRequestObject struct {
+	Data []string `json:"data"`
+}
+
+func ReadWebsiteHandler(websiteSvc WebsiteService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// read request
 		var req websiteRequestObject
@@ -18,7 +22,7 @@ func ReadWebsiteHandler(websiteSvc WesbiteService) func(w http.ResponseWriter, r
 		}
 
 		// add website to DB
-		websiteSvc.readWebsite(req) 
+		websiteSvc.readWebsite(req)
 
 		// response
 		w.WriteHeader(http.StatusOK)
@@ -26,38 +30,38 @@ func ReadWebsiteHandler(websiteSvc WesbiteService) func(w http.ResponseWriter, r
 	}
 }
 
-func GetWebsiteStatus(websiteSvc WesbiteService) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {		
+func GetWebsiteStatus(websiteSvc WebsiteService) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		url := r.URL.Query().Get("url")
-	
+
 		// if all websites status is requested
-		if url == "" {	
+		if url == "" {
+			w.Header().Set("Content-Type", "application/json")
+
 			allWebsiteStatus := websiteSvc.getAllWebsiteStatus()
-			
+
 			err := json.NewEncoder(w).Encode(allWebsiteStatus)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprintf(w, "cannot encode data into json")
-				return
+				json.NewEncoder(w).Encode(
+					struct {
+						message string
+					}{"Error occured"})
 			}
-
-			// success
-			w.WriteHeader(http.StatusOK)
 		} else {
 			websiteStatus, err := websiteSvc.getWebsiteStatus(url)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
-				fmt.Fprintf(w, "No such URL found")	
-				return 
+				fmt.Fprintf(w, "No such URL found")
+				return
 			}
-			
+
 			err = json.NewEncoder(w).Encode(websiteStatus)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				fmt.Fprintf(w, "cannot encode data into json")
 				return
 			}
-			w.WriteHeader(http.StatusOK)
 		}
 	}
 }

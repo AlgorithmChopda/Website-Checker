@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"net/http"
 	"time"
 )
 
@@ -15,13 +14,12 @@ var data = websiteDB{}
 
 type WebsiteRepository interface {
 	isPresent(websiteUrl string) bool
-	addWebsite(websiteUrl string)
+	addWebsite(websiteUrl string, isActive bool)
 	updateStatus(websiteUrl string, isActive bool)
 	getStatus(websiteUrl string) status
 	deleteWebsite(websiteUrl string)
 	getAllStatus() websiteDB
-	checkAllStatus()
-	pingWebsite(url string)
+	getWebsites() []string
 }
 
 func NewRespository() WebsiteRepository {
@@ -34,14 +32,6 @@ func (data *websiteDB) isPresent(websiteUrl string) bool {
 		return false
 	}
 	return true
-}
-
-func (data *websiteDB) addWebsite(websiteUrl string) {
-	(*data)[websiteUrl] = status{LastFetched: "not fetched yet"}
-}
-
-func (data *websiteDB) updateStatus(websiteUrl string, isActive bool) {
-	(*data)[websiteUrl] = status{isActive, time.Now().Format("2006-01-02 15:04:05")}
 }
 
 func (data *websiteDB) getStatus(websiteUrl string) status {
@@ -57,30 +47,22 @@ func (data *websiteDB) getAllStatus() websiteDB {
 	return dataMap
 }
 
+func (data *websiteDB) getWebsites() []string {
+	var urls []string
+	for key := range *data {
+		urls = append(urls, key)
+	}
+	return urls
+}
+
+func (data *websiteDB) addWebsite(websiteUrl string, isActive bool) {
+	(*data)[websiteUrl] = status{isActive, time.Now().Format("2006-01-02 15:04:05")}
+}
+
+func (data *websiteDB) updateStatus(websiteUrl string, isActive bool) {
+	(*data)[websiteUrl] = status{isActive, time.Now().Format("2006-01-02 15:04:05")}
+}
+
 func (data *websiteDB) deleteWebsite(websiteUrl string) {
 	delete(*data, websiteUrl)
-}
-
-func (data *websiteDB) checkAllStatus() {
-	for {
-		for url := range *data {
-			go data.pingWebsite(url)
-		}
-		time.Sleep(time.Second * 5)
-	}
-}
-
-// util function
-func (data *websiteDB) pingWebsite(url string) {
-	res, err := http.Get(url)
-	var status bool
-	if err != nil {
-		status = false
-	} else {
-		if res.StatusCode == 200 {
-			status = true
-		}
-	}
-
-	data.updateStatus(url, status)
 }

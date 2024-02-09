@@ -12,10 +12,10 @@ type service struct {
 	websiteRepo WebsiteRepository
 }
 type WebsiteService interface {
-	readWebsite(urls websiteRequestObject)
-	getWebsiteStatus(url string) (status, error)
-	getAllWebsiteStatus() websiteDB
-	pingWebsite(url string)
+	ReadWebsite(urls WebsiteRequestObject)
+	GetWebsiteStatus(url string) (Status, error)
+	GetAllWebsiteStatus() any
+	PingWebsite(url string)
 	CheckWebsiteStatus(ctx context.Context)
 }
 
@@ -25,25 +25,25 @@ func NewService(websiteRepoObject WebsiteRepository) WebsiteService {
 	}
 }
 
-func (svc *service) readWebsite(urls websiteRequestObject) {
+func (svc *service) ReadWebsite(urls WebsiteRequestObject) {
 	for _, url := range urls.Data {
 		fmt.Println(url)
 		if !svc.websiteRepo.isPresent(url) {
 			// checks status of website and adds it to data
-			svc.pingWebsite(url)
+			svc.PingWebsite(url)
 		}
 	}
 }
 
-func (svc *service) getWebsiteStatus(url string) (status, error) {
+func (svc *service) GetWebsiteStatus(url string) (Status, error) {
 	if svc.websiteRepo.isPresent(url) {
 		return svc.websiteRepo.getStatus(url), nil
 	}
 
-	return status{}, errors.New("No such website found")
+	return Status{}, errors.New("No such website found")
 }
 
-func (svc *service) getAllWebsiteStatus() websiteDB {
+func (svc *service) GetAllWebsiteStatus() any {
 	return svc.websiteRepo.getAllStatus()
 }
 
@@ -51,13 +51,13 @@ func (svc *service) CheckWebsiteStatus(ctx context.Context) {
 	for {
 		urls := svc.websiteRepo.getAllStatus()
 		for url := range urls {
-			go svc.pingWebsite(url)
+			go svc.PingWebsite(url)
 		}
 		time.Sleep(time.Second * 5)
 	}
 }
 
-func (svc *service) pingWebsite(url string) {
+func (svc *service) PingWebsite(url string) {
 	res, err := http.Get(url)
 	var status bool
 	if err != nil {

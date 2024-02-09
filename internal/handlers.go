@@ -6,14 +6,14 @@ import (
 	"net/http"
 )
 
-type websiteRequestObject struct {
+type WebsiteRequestObject struct {
 	Data []string `json:"data"`
 }
 
 func ReadWebsiteHandler(websiteSvc WebsiteService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// read request
-		var req websiteRequestObject
+		var req WebsiteRequestObject
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -22,7 +22,7 @@ func ReadWebsiteHandler(websiteSvc WebsiteService) func(w http.ResponseWriter, r
 		}
 
 		// add website to DB
-		websiteSvc.readWebsite(req)
+		websiteSvc.ReadWebsite(req)
 
 		// response
 		w.WriteHeader(http.StatusOK)
@@ -38,7 +38,7 @@ func GetWebsiteStatus(websiteSvc WebsiteService) func(w http.ResponseWriter, r *
 		if url == "" {
 			w.Header().Set("Content-Type", "application/json")
 
-			allWebsiteStatus := websiteSvc.getAllWebsiteStatus()
+			allWebsiteStatus := websiteSvc.GetAllWebsiteStatus()
 
 			err := json.NewEncoder(w).Encode(allWebsiteStatus)
 			if err != nil {
@@ -49,7 +49,7 @@ func GetWebsiteStatus(websiteSvc WebsiteService) func(w http.ResponseWriter, r *
 					}{"Error occured"})
 			}
 		} else {
-			websiteStatus, err := websiteSvc.getWebsiteStatus(url)
+			websiteStatus, err := websiteSvc.GetWebsiteStatus(url)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				fmt.Fprintf(w, "No such URL found")
